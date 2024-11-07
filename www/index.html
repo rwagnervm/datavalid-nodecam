@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Datavalid - Live</title>
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container"
+        style="display: grid; grid-template-rows: 60px 360px 80px 40px; grid-template-columns: 100%; height: 100vh; text-align: center; justify-content: center;">
+        <div style="font-size: 30px;">CPF: <input type="number" id="cpf" style="font-size:24px;"
+                value="87333953300" /></div>
+        <div><img id="self" width="640px" /></div>
+        <div id="resultadoFacial" style="font-size: 30px;"></div>
+        <div><button
+                style="border-radius: 4px; background-color: #04AA6D; color: white; border: none; height: 40px; width: 120px"
+                onclick="validar()">Validar</button></div>
+    </div>
+    <script>
+        async function validar() {
+            try {
+                const response = await fetch('http://localhost:9090/validate', {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ cpf: document.getElementById('cpf').value })
+                })
+                const respJson = await response.json();
+
+                if (response.status === 200) {
+                    if (respJson.biometria_facial.disponivel) {
+                        document.getElementById("resultadoFacial").innerHTML = "Similaridade da comparação facial: <b>" + Math.round(respJson.biometria_facial.similaridade * 1000) / 10 + "%</b>" + "<br/>" +
+                        "Probabilidade da comparação facial: " + respJson.biometria_facial.probabilidade
+                    }
+                } else {
+                    document.getElementById("resultadoFacial").innerHTML = response.status + " - " + JSON.stringify(respJson)
+                }
+            } catch (e) {
+                document.getElementById("resultadoFacial").innerHTML = e
+            }
+        }
+
+        (() => {
+            function connectSelf() {
+                const wsSelf = new WebSocket("ws://localhost:9091");
+                wsSelf.onmessage = data => document.getElementById("self").src = data.data;
+                wsSelf.onclose = () => setTimeout(connectSelf(), 1000);
+            };
+            connectSelf();
+        })();
+    </script>
+</body>
+
+</html>

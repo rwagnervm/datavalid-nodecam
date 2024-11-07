@@ -1,0 +1,17 @@
+{
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "jimp": "^1.6.0",
+    "node-webcam": "^0.8.2",
+    "request": "^2.88.2",
+    "ws": "^8.18.0"
+  }, 
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+
+}
